@@ -1,0 +1,15 @@
+{
+  "immersive.horizontalSendLimit": "Horizontal Send Limit",
+  "immersive.horizontalSendLimit.tooltip": "",
+  "immersive.portalDepth": "Portal Depth",
+  "immersive.portalDepth.tooltip": "Should usually be 'Atmosphere Radius' + 2",
+  "immersive.atmosphereRadius": "Atmosphere Radius",
+  "immersive.atmosphereRadius.tooltip": "The radius where the outer block of the atmosphere should be",
+  "immersive.renderDistance": "Render Distance",
+  "immersive.renderDistance.tooltip": "Measured in chunks",
+  "immersive.debugParticles": "Debug Particles",
+  "immersive.debugParticles.tooltip": "",
+  "immersive.defaultEnabled": "Default Enabled",
+  "immersive.defaultEnabled.tooltip": "Whether Immersive Cursedness Reforged is on by default.\n If you want to toggle ICR, use '/portal' command",
+  "immersive.page": "ImmersiveCursedness"
+}

@@ -1,0 +1,12 @@
+modLoader = "javafml"
+loaderVersion = "[43,)"
+license = "MIT"
+
+[[mods]]
+modId = "immersive_cursedness"
+version = "${version}"
+displayName = "ImmersiveCursednessReforged"
+authors="TeamPotato"
+description = '''
+
+'''

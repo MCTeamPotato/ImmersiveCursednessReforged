@@ -1,0 +1,24 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "nl.theepicblock.immersive_cursedness.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "EntityPositionS2CPacketAccessor",
+    "MixinPlayerEntity",
+    "MixinServerPlayerEntity",
+    "PortalForcerMixin",
+    "ServerChunkManagerInvoker",
+    "interdimensionalpackets.InventoryDistanceMixin",
+    "interdimensionalpackets.MixinInteractionManager",
+    "interdimensionalpackets.PlayerActionC2SMixin",
+    "interdimensionalpackets.ServerPlayNetworkHandlerMixin"
+  ],
+  "client": [
+    "interdimensionalpackets.ClientPlayerActionMixin",
+    "rubidium.SodiumSettingsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
