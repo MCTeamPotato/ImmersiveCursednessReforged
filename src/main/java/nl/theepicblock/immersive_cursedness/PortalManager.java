@@ -122,9 +122,7 @@ public class PortalManager {
     }
 
     private void garbageCollect(ServerPlayerEntity player) {
-        portals.removeIf(portal ->
-            portal.getDistance(player.getBlockPos()) > ImmersiveCursedness.Config.renderDistance.get()*16
-        );
+        portals.removeIf(portal -> portal.getDistance(player.getBlockPos()) > ImmersiveCursedness.Config.renderDistance.get()*16);
         portals.removeIf(portal -> {
             for (Portal portal1 : portals) {
                 if (portal1.contains(portal)) return true;

@@ -89,7 +89,7 @@ public class PlayerManager {
 
             //iterate through all layers behind the portal
             FlatStandingRectangle rect = portal.toFlatStandingRectangle();
-            for (int i = 1; i < atmosphereRadius.get() + 2; i++) {
+            for (int i = 1; i < (atmosphereRadius.get() + 2); i++) {
                 FlatStandingRectangle rect2 = rect.expand(i, player.getCameraPosVec(1));
                 sentLayers.add(rect2);
                 if (ImmersiveCursedness.Config.debugParticles.get()) rect2.visualise(player);
@@ -125,7 +125,7 @@ public class PlayerManager {
                         ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
                     }
 
-                    if (pos.getY() == bottomOfWorld+1) ret = atmosphereBetweenBlock;
+                    if (pos.getY() == bottomOfWorld + 1) ret = atmosphereBetweenBlock;
                     if (pos.getY() == bottomOfWorld) ret = atmosphereBlock;
 
                     BlockPos imPos = pos.toImmutable();

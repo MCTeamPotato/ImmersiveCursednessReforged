@@ -15,8 +15,7 @@
     "interdimensionalpackets.ServerPlayNetworkHandlerMixin"
   ],
   "client": [
-    "interdimensionalpackets.ClientPlayerActionMixin",
-    "rubidium.SodiumSettingsMixin"
+    "interdimensionalpackets.ClientPlayerActionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
