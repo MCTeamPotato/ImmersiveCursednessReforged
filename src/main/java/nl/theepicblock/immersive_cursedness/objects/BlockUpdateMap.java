@@ -1,11 +1,12 @@
 package nl.theepicblock.immersive_cursedness.objects;
 
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +32,7 @@ public class BlockUpdateMap extends Long2ObjectOpenHashMap<Short2ObjectMap<Block
 
     public void sendTo(ServerPlayerEntity player) {
         this.forEach((chunkSection, chunkContents) -> {
-            var buf = PacketByteBufs.create();
+            var buf = new PacketByteBuf(Unpooled.buffer());
             buf.writeLong(chunkSection);
             buf.writeBoolean(false);
             buf.writeVarInt(chunkContents.size());

@@ -1,10 +1,11 @@
 package nl.theepicblock.immersive_cursedness;
 
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -220,7 +221,7 @@ public class PlayerManager {
 
     @Contract("_, _, _ -> new")
     private static @NotNull EntityPositionS2CPacket createEntityPacket(@NotNull Entity entity, double x, double y) {
-        var buf = PacketByteBufs.create();
+        var buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeVarInt(entity.getId());
         buf.writeDouble(x);
         buf.writeDouble(y);

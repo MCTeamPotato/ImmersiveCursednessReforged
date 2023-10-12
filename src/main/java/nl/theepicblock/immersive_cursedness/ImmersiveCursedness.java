@@ -1,16 +1,21 @@
 package nl.theepicblock.immersive_cursedness;
 
 import com.mojang.brigadier.Command;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 @Mod("immersive_cursedness")
 public class ImmersiveCursedness {
@@ -18,19 +23,25 @@ public class ImmersiveCursedness {
     public static Thread cursednessThread;
     public static CursednessServer cursednessServer;
 
-    public ImmersiveCursedness() {
-        ServerLifecycleEvents.SERVER_STARTED.register(minecraftServer -> {
-            cursednessThread = new Thread(() -> {
-                cursednessServer = new CursednessServer(minecraftServer);
-                cursednessServer.start();
-            });
-            cursednessThread.start();
-            cursednessThread.setName("Immersive Cursedness Thread");
+    @SubscribeEvent
+    public void onServerStarted(@NotNull ServerStartedEvent event) {
+        MinecraftServer minecraftServer = event.getServer();
+        cursednessThread = new Thread(() -> {
+            cursednessServer = new CursednessServer(minecraftServer);
+            cursednessServer.start();
         });
+        cursednessThread.start();
+        cursednessThread.setName("Immersive Cursedness Thread");
+    }
 
-        ServerLifecycleEvents.SERVER_STOPPED.register(minecraftServer -> cursednessServer.stop());
+    @SubscribeEvent
+    public void onServerStopped(ServerStoppedEvent event) {
+        cursednessServer.stop();
+    }
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, b, c) -> dispatcher.register(CommandManager.literal("portal")
+    @SubscribeEvent
+    public void onCmdRegister(RegisterCommandsEvent event) {
+        event.getDispatcher().register(CommandManager.literal("portal")
                 .then(CommandManager.literal("toggle").executes((context) -> {
                     PlayerInterface pi = (PlayerInterface)context.getSource().getPlayer();
                     if (pi != null){
@@ -41,8 +52,11 @@ public class ImmersiveCursedness {
                         }
                     }
                     return Command.SINGLE_SUCCESS;
-                }))));
+                })));
+    }
 
+    public ImmersiveCursedness() {
+        MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.forgeConfigSpec);
     }
 
