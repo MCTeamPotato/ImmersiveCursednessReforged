@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockLocating;
 import net.minecraft.world.TeleportTarget;
@@ -24,28 +25,13 @@ import java.util.Optional;
 public class DummyEntity extends Entity {
     public DummyEntity(World world, @NotNull BlockPos pos) {
         super(EntityType.BLAZE, world);
-        this.setPos(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5);
+        this.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
     }
 
-    @Override
-    protected void initDataTracker() {
-
-    }
-
-    @Override
-    protected void readCustomDataFromNbt(NbtCompound tag) {
-
-    }
-
-    @Override
-    protected void writeCustomDataToNbt(NbtCompound tag) {
-
-    }
-
-    @Override
-    public Packet<?> createSpawnPacket() {
-        return null;
-    }
+    @Override protected void initDataTracker() {}
+    @Override protected void readCustomDataFromNbt(NbtCompound tag) {}
+    @Override protected void writeCustomDataToNbt(NbtCompound tag) {}
+    @Override public Packet<?> createSpawnPacket() {return null;}
 
     @Override
     public void setBodyYaw(float yaw) {
@@ -64,16 +50,16 @@ public class DummyEntity extends Entity {
             return null;
         } else {
             double coordinateScale = DimensionType.getCoordinateScaleFactor(this.world.getDimension(), destination.getDimension());
-            BlockPos blockPos3 = new BlockPos(this.getX() * coordinateScale, this.getY(), this.getZ() * coordinateScale);
+            BlockPos blockPos3 = new BlockPos(MathHelper.floor(this.getX() * coordinateScale), MathHelper.floor(this.getY()), MathHelper.floor(this.getZ() * coordinateScale));
             WorldBorder worldBorder = destination.getWorldBorder();
             Optional<BlockLocating.Rectangle> portalPosA = this.getPortalRect(destination, blockPos3, bl3, worldBorder);
             if (portalPosA.isPresent()) {
-                BlockState blockState = Util.getBlockAsync((ServerWorld)this.world, this.lastNetherPortalPosition);
+                BlockState blockState = Util.getBlockAsync((ServerWorld)this.getWorld(), this.lastNetherPortalPosition);
                 Direction.Axis axis2;
                 Vec3d vec3d2;
                 if (blockState.contains(Properties.HORIZONTAL_AXIS)) {
                     axis2 = blockState.get(Properties.HORIZONTAL_AXIS);
-                    BlockLocating.Rectangle portalPos = BlockLocating.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.world, blockPos) == blockState);
+                    BlockLocating.Rectangle portalPos = BlockLocating.getLargestRectangle(this.lastNetherPortalPosition, axis2, 21, Direction.Axis.Y, 21, (blockPos) -> Util.getBlockAsync((ServerWorld)this.getWorld(), blockPos) == blockState);
                     vec3d2 = this.positionInPortal(axis2, portalPos);
                 } else {
                     return null;

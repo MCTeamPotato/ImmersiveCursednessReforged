@@ -8,6 +8,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.poi.PointOfInterest;
 import net.minecraft.world.poi.PointOfInterestStorage;
@@ -15,6 +16,7 @@ import net.minecraft.world.poi.PointOfInterestTypes;
 import nl.theepicblock.immersive_cursedness.objects.DummyEntity;
 import nl.theepicblock.immersive_cursedness.objects.Portal;
 import nl.theepicblock.immersive_cursedness.objects.TransformProfile;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -103,7 +105,7 @@ public class PortalManager {
         return Util.getBlockAsync(world, pos).isFullCube(world, pos);
     }
 
-    private TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
+    private @Nullable TransformProfile createTransformProfile(BlockPos pos, ServerWorld destination) {
         DummyEntity dummyEntity = new DummyEntity(((PlayerInterface)player).immersivecursedness$getUnfakedWorld(), pos);
         dummyEntity.setBodyYaw(0);
         portalForcerMixinActivate = true;
@@ -116,7 +118,7 @@ public class PortalManager {
 
         return new TransformProfile(
                 pos,
-                new BlockPos(teleportTarget.position),
+                new BlockPos(MathHelper.floor(teleportTarget.position.x), MathHelper.floor(teleportTarget.position.y), MathHelper.floor(teleportTarget.position.z)),
                 0,
                 (int)teleportTarget.yaw);
     }

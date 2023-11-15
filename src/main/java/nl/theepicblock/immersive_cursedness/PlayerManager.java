@@ -4,20 +4,24 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import nl.theepicblock.immersive_cursedness.objects.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.UUID;
@@ -60,6 +64,7 @@ public class PlayerManager {
         List<FlatStandingRectangle> sentLayers = new ObjectArrayList<>(portalManager.getPortals().size()* (atmosphereRadius.get() + 2));
         Chunk2IntMap sentBlocks = new Chunk2IntMap();
         BlockUpdateMap toBeSent = new BlockUpdateMap();
+        List<BlockEntityUpdateS2CPacket> blockEntityPackets = new ArrayList<>();
 
         List<Entity> entities;
         try {
@@ -70,7 +75,7 @@ public class PlayerManager {
         BlockState atmosphereBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_CONCRETE : Blocks.NETHER_WART_BLOCK).getDefaultState();
         BlockState atmosphereBetweenBlock = (sourceWorld.getRegistryKey() == World.NETHER ? Blocks.BLUE_STAINED_GLASS : Blocks.RED_STAINED_GLASS).getDefaultState();
 
-        if (player.hasPortalCooldown())return;
+        if (player.hasPortalCooldown()) return;
 
         boolean isCloseToPortal = false;
         //iterate through all portals
@@ -117,6 +122,7 @@ public class PlayerManager {
                     if (dist > Math.pow(atmosphereRadius.get() + 1, 2)) return;
 
                     BlockState ret;
+                    BlockEntity entity = null;
 
                     if (dist >  Math.pow(atmosphereRadius.get(), 2)) {
                         ret = atmosphereBlock;
@@ -124,6 +130,7 @@ public class PlayerManager {
                         ret = atmosphereBetweenBlock;
                     } else {
                         ret = transformProfile.transformAndGetFromWorld(pos, destinationView);
+                        entity = transformProfile.transformAndGetFromWorldBlockEntity(pos, destinationView);
                     }
 
                     if (pos.getY() == bottomOfWorld + 1) ret = atmosphereBetweenBlock;
@@ -135,6 +142,13 @@ public class PlayerManager {
                         if (!ret.isAir() || !sourceView.getBlock(pos).isAir()) {
                             blockCache.put(imPos, ret);
                             toBeSent.put(imPos, ret);
+                            if (entity != null) {
+                                var buf = new PacketByteBuf(Unpooled.buffer());
+                                buf.writeBlockPos(imPos);
+                                buf.writeRegistryValue(Registry.BLOCK_ENTITY_TYPE, entity.getType());
+                                buf.writeNbt(entity.toInitialChunkDataNbt());
+                                blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                            }
                         }
                     }
                 });
@@ -147,6 +161,14 @@ public class PlayerManager {
             BlockState originalBlock = sourceView.getBlock(pos);
             if (originalBlock != cachedState) {
                 toBeSent.put(pos, originalBlock);
+                BlockEntity entity = sourceView.getBlockEntity(pos);
+                if (entity != null) {
+                    var buf = new PacketByteBuf(Unpooled.buffer());
+                    buf.writeBlockPos(pos);
+                    buf.writeRegistryValue(Registry.BLOCK_ENTITY_TYPE, entity.getType());
+                    buf.writeNbt(entity.toInitialChunkDataNbt());
+                    blockEntityPackets.add(new BlockEntityUpdateS2CPacket(buf));
+                }
             }
             if (ImmersiveCursedness.Config.debugParticles.get()) Util.sendParticle(player, Util.getCenter(pos), 1, 0, originalBlock != cachedState ? 0 : 1);
         });
@@ -161,6 +183,7 @@ public class PlayerManager {
             }
         });
         toBeSent.sendTo(this.player);
+        for (var packet : blockEntityPackets) this.player.networkHandler.sendPacket(packet);
         previousWorld = sourceWorld;
     }
 
